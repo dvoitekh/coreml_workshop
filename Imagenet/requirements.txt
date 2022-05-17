@@ -1,0 +1,4 @@
+pandas==1.2.3
+coremltools==5.1.0
+torchvision==0.11.0
+torch==1.11.0
