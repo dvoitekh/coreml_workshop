@@ -76,16 +76,15 @@ class Recommender {
     }
 
     func makePredictions(otherAlbums: [Album], classifier: MLLinearRegressor, uniqueKeywords: [String]) throws -> [Album] {
-        var albumsWithScores = [Album:Double]()
-
+        var featuresAll = [[Int]]()
         for album in otherAlbums {
-            let features = [albumFeatures(album: album, uniqueKeywords: uniqueKeywords)]
-            let df = buildDataframe(features: features, uniqueKeywords: uniqueKeywords)
-            let predictions = try classifier.predictions(from: df)
-            albumsWithScores[album] = predictions[0] as? Double
+            featuresAll.append(albumFeatures(album: album, uniqueKeywords: uniqueKeywords))
         }
-
-        return albumsWithScores.sorted(by: { $0.value > $1.value }).map { $0.key }
+        
+        let df = buildDataframe(features: featuresAll, uniqueKeywords: uniqueKeywords)
+        let predictions = try classifier.predictions(from: df)
+        
+        return otherAlbums.enumerated().sorted(by: { predictions[$0.offset] as! Double > predictions[$1.offset] as! Double }).map { $0.element }
     }
     
     private func trainLinearRegressor(data: DataFrame) async throws -> MLLinearRegressor? {
